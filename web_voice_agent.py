@@ -691,6 +691,17 @@ async def main():
     print("=" * 70)
     print()
     
+    # Diagnostic: Print environment configuration (for troubleshooting Cloud Run issues)
+    if config.DEBUG and config.USE_AZURE:
+        print("🔍 Environment Configuration Diagnostics:")
+        print(f"   USE_AZURE: {config.USE_AZURE}")
+        print(f"   AZURE_OPENAI_ENDPOINT: {config.AZURE_OPENAI_ENDPOINT}")
+        print(f"   AZURE_OPENAI_DEPLOYMENT: {config.AZURE_OPENAI_DEPLOYMENT}")
+        print(f"   AZURE_API_VERSION: {config.AZURE_API_VERSION}")
+        api_key_set = "SET" if config.AZURE_OPENAI_API_KEY else "NOT SET"
+        print(f"   AZURE_OPENAI_API_KEY: {api_key_set}")
+        print()
+    
     agent = WebVoiceAgent()
     await agent.initialize()
     

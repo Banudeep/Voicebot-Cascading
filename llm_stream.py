@@ -68,9 +68,23 @@ class LLMStream:
             if config.DEBUG:
                 print(f"✓ Using Azure OpenAI Chat Completions API")
                 print(f"  Endpoint: {config.AZURE_OPENAI_ENDPOINT}")
-                print(f"  Deployment: {config.AZURE_OPENAI_DEPLOYMENT}")
+                print(f"  Deployment: '{config.AZURE_OPENAI_DEPLOYMENT}'")
                 print(f"  API Version: {config.AZURE_API_VERSION}")
                 print(f"  Base URL: {base_url}")
+                
+                # Diagnostic: Check environment variable values (masked)
+                api_key_preview = config.AZURE_OPENAI_API_KEY[:8] + "..." + config.AZURE_OPENAI_API_KEY[-4] if config.AZURE_OPENAI_API_KEY and len(config.AZURE_OPENAI_API_KEY) > 12 else "NOT SET"
+                print(f"  API Key: {api_key_preview}")
+                print(f"  USE_AZURE: {config.USE_AZURE}")
+                
+                # Check for common issues
+                import os
+                raw_deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "")
+                if raw_deployment and (raw_deployment.startswith('"') or raw_deployment.startswith("'") or raw_deployment.endswith('"') or raw_deployment.endswith("'")):
+                    print(f"\n  ⚠️  WARNING: Deployment name had quotes! Original: '{raw_deployment}'")
+                    print(f"     Stripped to: '{config.AZURE_OPENAI_DEPLOYMENT}'")
+                    print(f"     If you still see 404 errors, check Cloud Run environment variables")
+                    print(f"     and remove quotes from AZURE_OPENAI_DEPLOYMENT value.")
                 
                 # Validate API version format
                 valid_versions = ["2025-01-01-preview", "2024-10-01-preview", "2024-02-15-preview", "2023-12-01-preview", "2023-05-15"]
@@ -86,6 +100,7 @@ class LLMStream:
                 print(f"     3. Deployment name matches exactly (case-sensitive)")
                 print(f"     4. API version is valid (try: 2024-10-01-preview)")
                 print(f"     5. API key has access to this deployment")
+                print(f"     6. Environment variables are set in Cloud Run deployment")
         else:
             # Standard OpenAI
             if not config.OPENAI_API_KEY:
@@ -444,15 +459,37 @@ class LLMStream:
             
             # Provide helpful troubleshooting info for 404 errors
             if status_code == 404 or "404" in error_msg or "not found" in error_msg.lower():
+                import os
+                raw_deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "")
+                has_quotes = raw_deployment and (raw_deployment.startswith('"') or raw_deployment.startswith("'") or raw_deployment.endswith('"') or raw_deployment.endswith("'"))
+                
                 print(f"\n   🔍 Troubleshooting 404 error:")
                 print(f"   1. Deployment name: '{self.model}' (verify in Azure Portal)")
+                if has_quotes:
+                    print(f"      ⚠️  WARNING: Original env var had quotes: '{raw_deployment}'")
+                    print(f"      → Make sure Cloud Run env var has NO quotes: gpt-4o-mini (not \"gpt-4o-mini\")")
                 print(f"   2. Deployment type: Must be 'Chat Completions' (NOT Realtime API)")
                 print(f"   3. API version: '{config.AZURE_API_VERSION}'")
                 print(f"      → Try changing to: 2024-10-01-preview")
                 print(f"      → Or try: 2024-02-15-preview")
                 print(f"   4. Endpoint: {config.AZURE_OPENAI_ENDPOINT}")
                 print(f"   5. API key: Verify it has access to this deployment")
-                print(f"\n   💡 Quick fix: Update your .env file:")
+                
+                # Cloud Run specific troubleshooting
+                if os.getenv("K_SERVICE") or os.getenv("CLOUD_RUN_SERVICE"):
+                    print(f"\n   ☁️  Cloud Run Deployment Detected:")
+                    print(f"   6. Verify environment variables are set in Cloud Run (NO QUOTES!):")
+                    print(f"      - USE_AZURE=true")
+                    print(f"      - AZURE_OPENAI_ENDPOINT={config.AZURE_OPENAI_ENDPOINT or 'NOT SET'}")
+                    print(f"      - AZURE_OPENAI_DEPLOYMENT={config.AZURE_OPENAI_DEPLOYMENT or 'NOT SET'}")
+                    print(f"        (Raw value was: '{raw_deployment}')")
+                    print(f"      - AZURE_OPENAI_API_KEY={'SET' if config.AZURE_OPENAI_API_KEY else 'NOT SET'}")
+                    print(f"      - AZURE_API_VERSION={config.AZURE_API_VERSION}")
+                    print(f"   7. Check Cloud Run logs for environment variable values")
+                    print(f"   8. Verify Azure OpenAI allows connections from Cloud Run IPs")
+                    print(f"      (Check Azure Portal → Networking → Firewall rules)")
+                
+                print(f"\n   💡 Quick fix: Update your environment variables:")
                 print(f"      AZURE_API_VERSION=2024-10-01-preview")
                 
                 # If using an invalid API version, suggest trying a known-good one

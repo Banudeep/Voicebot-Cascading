@@ -17,7 +17,9 @@ FOURSQUARE_API_KEY = os.getenv("FOURSQUARE_SERVICE_TOKEN")
 USE_AZURE = os.getenv("USE_AZURE", "false").lower() == "true"
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
-AZURE_OPENAI_DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+# Strip quotes and whitespace from deployment name (common issue in Cloud Run)
+_deployment_raw = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+AZURE_OPENAI_DEPLOYMENT = _deployment_raw.strip('"\'') if _deployment_raw else None
 AZURE_API_VERSION = os.getenv("AZURE_API_VERSION", "2025-01-01-preview")
 
 # Azure Speech Services Settings
