@@ -75,9 +75,8 @@ The **Voice Agent** is a real-time voice assistant that enables natural, convers
 
 ## 🏗️ Architecture
 
-```
-   <img src="images/Voicebot-Cascading-architecture-diag.png" alt="Architecture Diagram"/>
-
+<img src="images/Voicebot-Cascading-architecture-diag.png" alt="Architecture Diagram"/>
+````
                     DATA FLOW:
 
     1. User speaks → Browser captures audio (AudioWorklet)
@@ -90,7 +89,8 @@ The **Voice Agent** is a real-time voice assistant that enables natural, convers
     8. TTS returns audio → Server
     9. Server sends audio via WebSocket → Browser
     10. Browser plays audio to user
-```
+
+````
 
 ### **Technology Stack**
 
@@ -120,7 +120,7 @@ The **Voice Agent** is a real-time voice assistant that enables natural, convers
 
    ```bash
    cd voice_agent
-   ```
+````
 
 2. **Create virtual environment:**
 
