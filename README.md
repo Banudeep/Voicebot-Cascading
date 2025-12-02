@@ -76,7 +76,7 @@ The **Voice Agent** is a real-time voice assistant that enables natural, convers
 ## 🏗️ Architecture
 
 ```
-   <img src="images/Voicebot-Cascading-architecture-diag.svg" alt="Architecture Diagram"/>
+   <img src="images/Voicebot-Cascading-architecture-diag.png" alt="Architecture Diagram"/>
 
                     DATA FLOW:
 
