@@ -1,0 +1,38 @@
+services:
+  voice-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: voicebot-general
+    ports:
+      - "8080:8080" # Unified HTTP + WebSocket server
+    environment:
+      # Azure OpenAI Configuration (required)
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_OPENAI_DEPLOYMENT=${AZURE_OPENAI_DEPLOYMENT}
+      - AZURE_API_VERSION=${AZURE_API_VERSION:-2025-04-01-preview}
+
+      # Azure Speech Services Configuration (required)
+      - AZURE_SPEECH_KEY=${AZURE_SPEECH_KEY}
+      - AZURE_SPEECH_REGION=${AZURE_SPEECH_REGION}
+      - AZURE_SPEECH_LANGUAGE=${AZURE_SPEECH_LANGUAGE:-en-US}
+      - AZURE_SPEECH_VOICE=${AZURE_SPEECH_VOICE:-en-US-JennyNeural}
+
+      # Recording Settings
+      - ENABLE_RECORDINGS=${ENABLE_RECORDINGS:-false}
+
+      # Debug Settings
+      - DEBUG=${DEBUG:-true}
+      - VERBOSE=${VERBOSE:-false}
+
+    volumes:
+      # Persist recordings outside container
+      - ./recordings:/app/recordings
+    restart: unless-stopped
+    networks:
+      - voice-agent-network
+
+networks:
+  voice-agent-network:
+    driver: bridge
